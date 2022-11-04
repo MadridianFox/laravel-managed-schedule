@@ -50,4 +50,16 @@ class ManagedScheduleItem extends Model
             $schedulingItem->save();
         });
     }
+
+    public function saveLastStarted(): void
+    {
+        $this->last_start_at = now();
+        $this->save();
+    }
+
+    public function saveLastFinished(): void
+    {
+        $this->last_end_at = now();
+        $this->save();
+    }
 }

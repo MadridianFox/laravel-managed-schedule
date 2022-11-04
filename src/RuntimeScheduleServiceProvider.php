@@ -8,7 +8,8 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use MadridianFox\LaravelRuntimeSchedule\Commands\ManagedScheduleRunCommand;
-use MadridianFox\LaravelRuntimeSchedule\Models\ManagedScheduleItem;
+use MadridianFox\LaravelRuntimeSchedule\Listeners\OnTaskFinished;
+use MadridianFox\LaravelRuntimeSchedule\Listeners\OnTaskStarted;
 
 class RuntimeScheduleServiceProvider extends ServiceProvider
 {
@@ -21,23 +22,8 @@ class RuntimeScheduleServiceProvider extends ServiceProvider
             $this->events = $events;
         });
 
-        Event::listen(ScheduledTaskStarting::class, function (ScheduledTaskStarting $event) {
-            $storedEvent = ManagedScheduleItem::findBySchedulingEvent($event->task);
-            if (!$storedEvent) {
-                return;
-            }
-            $storedEvent->last_start_at = now();
-            $storedEvent->save();
-        });
-
-        Event::listen(ScheduledTaskFinished::class, function (ScheduledTaskFinished $event) {
-            $storedEvent = ManagedScheduleItem::findBySchedulingEvent($event->task);
-            if (!$storedEvent) {
-                return;
-            }
-            $storedEvent->last_end_at = now();
-            $storedEvent->save();
-        });
+        Event::listen(ScheduledTaskStarting::class, OnTaskStarted::class);
+        Event::listen(ScheduledTaskFinished::class, OnTaskFinished::class);
 
         $this->commands([
             ManagedScheduleRunCommand::class,
