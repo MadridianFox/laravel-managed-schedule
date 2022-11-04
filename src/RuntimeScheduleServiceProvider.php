@@ -7,8 +7,8 @@ use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use MadridianFox\LaravelRuntimeSchedule\Commands\RuntimeScheduleRunCommand;
-use MadridianFox\LaravelRuntimeSchedule\Models\ScheduledEvent;
+use MadridianFox\LaravelRuntimeSchedule\Commands\ManagedScheduleRunCommand;
+use MadridianFox\LaravelRuntimeSchedule\Models\ManagedScheduleItem;
 
 class RuntimeScheduleServiceProvider extends ServiceProvider
 {
@@ -22,7 +22,7 @@ class RuntimeScheduleServiceProvider extends ServiceProvider
         });
 
         Event::listen(ScheduledTaskStarting::class, function (ScheduledTaskStarting $event) {
-            $storedEvent = ScheduledEvent::findByEvent($event->task);
+            $storedEvent = ManagedScheduleItem::findBySchedulingEvent($event->task);
             if (!$storedEvent) {
                 return;
             }
@@ -31,7 +31,7 @@ class RuntimeScheduleServiceProvider extends ServiceProvider
         });
 
         Event::listen(ScheduledTaskFinished::class, function (ScheduledTaskFinished $event) {
-            $storedEvent = ScheduledEvent::findByEvent($event->task);
+            $storedEvent = ManagedScheduleItem::findBySchedulingEvent($event->task);
             if (!$storedEvent) {
                 return;
             }
@@ -40,7 +40,7 @@ class RuntimeScheduleServiceProvider extends ServiceProvider
         });
 
         $this->commands([
-            RuntimeScheduleRunCommand::class,
+            ManagedScheduleRunCommand::class,
         ]);
     }
 }

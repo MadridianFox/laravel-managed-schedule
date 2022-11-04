@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('scheduled_events', function (Blueprint $table) {
+        Schema::create('managed_schedule_items', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
 
@@ -22,6 +22,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('scheduled_events');
+        Schema::dropIfExists('managed_schedule_items');
     }
 };

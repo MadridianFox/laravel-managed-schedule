@@ -1,5 +1,5 @@
 {
-    "name": "madridianfox/laravel-runtime-schedule",
+    "name": "madridianfox/laravel-managed-schedule",
     "type": "library",
     "license": "MIT",
     "autoload": {

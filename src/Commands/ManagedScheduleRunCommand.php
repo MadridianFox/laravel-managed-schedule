@@ -2,16 +2,15 @@
 
 namespace MadridianFox\LaravelRuntimeSchedule\Commands;
 
-use Illuminate\Console\Scheduling\Event;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Console\Scheduling\ScheduleRunCommand;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Events\Dispatcher;
-use MadridianFox\LaravelRuntimeSchedule\Models\ScheduledEvent;
+use MadridianFox\LaravelRuntimeSchedule\Models\ManagedScheduleItem;
 
-class RuntimeScheduleRunCommand extends ScheduleRunCommand
+class ManagedScheduleRunCommand extends ScheduleRunCommand
 {
-    protected $signature = 'runtime-schedule:run';
+    protected $signature = 'schedule:run';
 
     public function handle(Schedule $schedule, Dispatcher $dispatcher, ExceptionHandler $handler)
     {
@@ -22,14 +21,14 @@ class RuntimeScheduleRunCommand extends ScheduleRunCommand
 
     private function mergeEventsFromDb(Schedule $schedule): array
     {
-        $storedEvents = ScheduledEvent::all()->keyBy('command');
+        $storedEvents = ManagedScheduleItem::all()->keyBy('command');
         $actualEvents = [];
 
         foreach ($schedule->events() as $event) {
-            /** @var ScheduledEvent|null $storedEvent */
+            /** @var ManagedScheduleItem|null $storedEvent */
             $storedEvent = $storedEvents->get($event->command);
             if (!$storedEvent) {
-                $storedEvent = $this->saveNewEvent($event);
+                $storedEvent = ManagedScheduleItem::createFromSchedulingEvent($event);
             }
 
             if (!$storedEvent->enabled) {
@@ -41,17 +40,5 @@ class RuntimeScheduleRunCommand extends ScheduleRunCommand
         }
 
         return $actualEvents;
-    }
-
-    private function saveNewEvent(Event $event): ScheduledEvent
-    {
-        $storedEvent = new ScheduledEvent();
-        $storedEvent->schedule = $event->expression;
-        $storedEvent->command = $event->command;
-        $storedEvent->enabled = true;
-
-        $storedEvent->save();
-
-        return $storedEvent;
     }
 }
